@@ -28,8 +28,9 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "src/cardano-token-registry/*",
-      "cardano-token-registry/*"
+      "build/*",
+      "cache/*",
+      "tmp/*"
     ]
   },
   "dependencies": {

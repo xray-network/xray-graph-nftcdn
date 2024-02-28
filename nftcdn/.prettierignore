@@ -1,2 +1,4 @@
 src/db/migrations
-src/cardano-token-registry
+build
+cache
+tmp
