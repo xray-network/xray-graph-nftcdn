@@ -1,5 +1,5 @@
 import postgresClient from "postgres"
-import { DB_URI_POSTGRES } from "../config/vars"
+import { DB_URI_POSTGRES } from "../../config/vars"
 
 export const dropDatabase = async (): Promise<void> => {
   const postgres = postgresClient(DB_URI_POSTGRES, { max: 1 })
