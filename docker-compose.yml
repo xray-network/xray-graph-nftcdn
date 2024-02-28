@@ -1,0 +1,139 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_VERSION:-16.1-alpine}
+    env_file: ./.env
+    environment:
+      - POSTGRES_LOGGING=true
+    ports:
+      - ${POSTGRES_PORT:-5432}:5432
+    shm_size: '2gb'
+    volumes:
+      - ./config/postgresql/postgresql.conf:/etc/postgresql.conf
+      - postgres-data:/var/lib/postgresql/data
+    command: [
+      "-c", "config_file=/etc/postgresql.conf"
+    ]
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  cardano-node-ogmios:
+    image: cardanosolutions/cardano-node-ogmios:${OGMIOS_VERSION:-v6.0.0}_${CARDANO_NODE_VERSION:-8.7.2}-${NETWORK:-mainnet}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    ports:
+      - ${OGMIOS_PORT:-1337}:1337
+      - ${CARDANO_NODE_PORT:-3000}:3000
+    restart: on-failure
+    volumes:
+      - node-db:/db
+      - node-ipc:/ipc
+
+  kubo:
+    image: ipfs/kubo:${KUBO_VERSION:-master-latest}
+    volumes:
+      - ipfs_path:/data/ipfs
+      - ipfs_fuse:/ipfs
+      - ipns_fuse:/ipns
+      - ./config/kubo/0001-init-config.sh:/container-init.d/0001-init-config.sh
+    environment:
+      - IPFS_PATH=/data/ipfs
+      - IPFS_PROFILE=server
+    ports:
+      - 4001:4001/tcp
+      - 4001:4001/udp
+      - 127.0.0.1:5001:5001
+      - ${KUBO_PORT:-1882}:8080
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  haproxy:
+    image: haproxy:2.8.3
+    environment:
+      - NETWORK=${NETWORK:-mainnet}
+      - OGMIOS_PORT=1337
+      - KUBO_PORT=8080
+      - NFTCDN_SERVER_PORT=4700
+    ports:
+      - ${HAPROXY_PORT:-80}:8080
+      - ${HAPROXY_SSL_PORT:-443}:8443
+    depends_on:
+      - cardano-node-ogmios
+      - kubo
+      - nftcdn-server
+    profiles: [haproxy]
+    shm_size: '2gb'
+    volumes:
+      - ./config/haproxy:/usr/local/etc/haproxy
+      #- /etc/ssl/ssl_key.pem:/ssl_key.pem
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  nftcdn-extractor:
+    build:
+      context: .
+      target: nftcdn-extractor
+    env_file: ./.env
+    volumes:
+      - cache:/home/node/app/cache
+    environment:
+      - NETWORK=${NETWORK:-mainnet}
+      - OGMIOS_HOST=cardano-node-ogmios
+      - OGMIOS_PORT=1337
+    depends_on:
+      - cardano-node-ogmios
+      - postgres
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  nftcdn-server:
+    build:
+      context: .
+      target: nftcdn-server
+    env_file: ./.env
+    environment:
+      - NETWORK=${NETWORK:-mainnet}
+      - KUBO_HOST=kubo
+      - KUBO_PORT=8080
+    volumes:
+      - cache:/home/node/app/cache
+    ports:
+      - ${NFTCDN_SERVER_PORT:-4700}:4700
+    depends_on:
+      - nftcdn-extractor
+      - kubo
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  node-db:
+  node-ipc:
+  ipfs_path:
+  ipfs_fuse:
+  ipns_fuse:
+  postgres-data:
+  cache:
