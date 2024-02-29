@@ -106,7 +106,7 @@ docker compose -p preview -p nftcdn-preview up -d --build
 | GET  | /metadata/:fingerprint | ?raw=true |  Don't replace image value with `SERVER_IMAGE_URL` prefix  |
 | POST  | /metadata | {"fingerprints": string[], "raw": boolean } |  Bulk metadata retreiving (up to 1000)  |
 | GET | /assets | | Get lits of assets with basic info |
-| GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit=&offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
+| GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit= &offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
 | GET | /ipfs/:cid |  | IPFS gateway proxy |
 
   
