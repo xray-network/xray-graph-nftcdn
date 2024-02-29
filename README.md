@@ -4,8 +4,7 @@
 
 > [!NOTE]
 > XRAY | Graph | NFTCDN is a dockered Cardano native tokenes metadata/datums indexer/explorer API tool and images CDN with IPFS gateway, based on [Ogmios](https://ogmios.dev/) and [Kubo](https://github.com/ipfs/kubo).
-
-
+> Indexes metadata from `CIP25` (Media Token Metadata: TX Label 721), `CIP26` (Cardano Token Registry), `CIP27` (Royalties: TX Label 777), `CIP60` (Music Token), `CIP68` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format.
 
 ## Getting Started
 
@@ -97,7 +96,18 @@ docker compose -p preview -p nftcdn-preview up -d --build
 
 ## Endpoints List
   
-Table
+| Method  | Endpoint | Params | Description |
+| --- | --- | --- | --- |
+| GET  | /image/:fingerprint | | Proxy original image (IPFS, HTTP, Base64) from asset metadata in order `cip68->cip25->cip26` |
+| GET  | /image/:fingerprint | ?select=cip25 | Specify from which metadata to load the image. Options: `cip25`, `cip26`, `cip68` |
+| GET  | /image/:fingerprint | ?size=256 | Resize, cache, and serve image |
+| GET  | /image/:fingerprint | ?size=256&crop=true |  Resize, crop (to square), cache, and serve image  |
+| GET  | /metadata/:fingerprint | |  Serve asset metadata  |
+| GET  | /metadata/:fingerprint | ?raw=true |  Don't replace image value with `SERVER_IMAGE_URL` prefix  |
+| POST  | /metadata | {"fingerprints": string[], "raw": boolean } |  Bulk metadata retreiving (up to 1000)  |
+| GET | /assets | | Get lits of assets with basic info |
+| GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit=&offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
+| GET | /ipfs/:cid |  | IPFS gateway proxy |
 
   
 ## Advanced Usage
