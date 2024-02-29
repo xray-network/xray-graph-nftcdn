@@ -1,9 +1,9 @@
 <a href="https://discord.gg/WhZmm46APN"><img alt="Discord" src="https://img.shields.io/discord/852538978946383893?style=for-the-badge&logo=discord&label=Discord&labelColor=%231940ED&color=%233FCB9B"></a>
 
-# XRAY | Graph | NFTCCDN — Cardano Tokens Metadata Explorer & Images CDN
+# XRAY | Graph | NFTCDN — Cardano Tokens Metadata Explorer & Images CDN
 
 > [!NOTE]
-> XRAY | Graph | NFTCCDN is a dockered Cardano native tokenes metadata/datums indexer/explorer API tool and images CDN with IPFS gateway, based on [Ogmios](https://ogmios.dev/) and [Kubo](https://github.com/ipfs/kubo).
+> XRAY | Graph | NFTCDN is a dockered Cardano native tokenes metadata/datums indexer/explorer API tool and images CDN with IPFS gateway, based on [Ogmios](https://ogmios.dev/) and [Kubo](https://github.com/ipfs/kubo).
 
 
 
