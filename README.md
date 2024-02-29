@@ -4,7 +4,7 @@
 
 > [!NOTE]
 > XRAY | Graph | NFTCDN is a dockered Cardano native tokenes metadata/datums indexer/explorer API tool and images CDN with IPFS gateway, based on [Ogmios](https://ogmios.dev/) and [Kubo](https://github.com/ipfs/kubo).
-> Indexes metadata from `CIP25` (Media Token Metadata: TX Label 721), `CIP26` (Cardano Token Registry), `CIP27` (Royalties: TX Label 777), `CIP60` (Music Token), `CIP68` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format. Useue [Sharp](https://sharp.pixelplumbing.com/) for image processing.
+> Indexes metadata from `CIP-0025` (Media Token Metadata: TX Label 721), `CIP-0026` (Cardano Token Registry), `CIP-0027` (Royalties: TX Label 777), `CIP-0060` (Music Token), `CIP-0068` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format. Uses [Sharp](https://sharp.pixelplumbing.com/) for image processing.
 
 ## Getting Started
 
