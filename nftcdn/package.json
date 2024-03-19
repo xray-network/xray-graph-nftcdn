@@ -20,8 +20,8 @@
     "build": "rm -rf ./build && tsc -p .",
     "db:delete": "rm -rf src/db/migrations",
     "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "ts-node src/scripts/migrate",
-    "db:drop": "ts-node src/scripts/drop",
+    "db:migrate": "ts-node src/db/scripts/migrate",
+    "db:drop": "ts-node src/db/scripts/drop",
     "db": "yarn db:delete && yarn db:drop && yarn db:generate && yarn db:migrate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md,scss,css}\""

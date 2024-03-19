@@ -1,6 +1,6 @@
 import express from "express"
 import cron from "node-cron"
-import { dbMigrate } from "./scripts/migrateFn"
+import { dbMigrate } from "./db/scripts/migrateFn"
 import { logger } from "./utils"
 import * as Ogmios from "./services/ogmios"
 import { getResumeSlot, onRollBackward, onRollForward, registrySync } from "./app/extractor"
