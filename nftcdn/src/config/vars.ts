@@ -18,4 +18,3 @@ export const DB_URI_POSTGRES = `postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}
 
 export const SERVER_IMAGE_URL = process.env.SERVER_IMAGE_URL || `https://graph.xray.app/output/nftcdn/${NETWORK}/api/v1`
 export const MAX_IMAGE_SIZE = Number(process.env.MAX_IMAGE_SIZE)
-export const OUTPUT_AUTH_TOKEN = process.env.OUTPUT_AUTH_TOKEN

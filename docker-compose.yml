@@ -7,7 +7,7 @@ services:
     environment:
       - POSTGRES_LOGGING=true
     ports:
-      - ${POSTGRES_PORT:-5432}:5432
+      - 127.0.0.1:${POSTGRES_PORT:-5432}:5432
     shm_size: '2gb'
     volumes:
       - ./config/postgresql/postgresql.conf:/etc/postgresql.conf
@@ -23,14 +23,14 @@ services:
         max-file: "10"
 
   cardano-node-ogmios:
-    image: cardanosolutions/cardano-node-ogmios:${OGMIOS_VERSION:-v6.0.0}_${CARDANO_NODE_VERSION:-8.7.2}-${NETWORK:-mainnet}
+    image: cardanosolutions/cardano-node-ogmios:${OGMIOS_VERSION:-v6.1.0}_${CARDANO_NODE_VERSION:-8.7.3}-${NETWORK:-mainnet}
     logging:
       driver: "json-file"
       options:
         max-size: "400k"
         max-file: "20"
     ports:
-      - ${OGMIOS_PORT:-1337}:1337
+      - 127.0.0.1:${OGMIOS_PORT:-1337}:1337
       - ${CARDANO_NODE_PORT:-3000}:3000
     restart: on-failure
     volumes:
@@ -51,7 +51,7 @@ services:
       - 4001:4001/tcp
       - 4001:4001/udp
       - 127.0.0.1:5001:5001
-      - ${KUBO_PORT:-1882}:8080
+      - 127.0.0.1:${KUBO_PORT:-1882}:8080
     restart: on-failure
     logging:
       driver: "json-file"
@@ -63,9 +63,6 @@ services:
     image: haproxy:2.8.3
     environment:
       - NETWORK=${NETWORK:-mainnet}
-      - OGMIOS_PORT=1337
-      - KUBO_PORT=8080
-      - NFTCDN_SERVER_PORT=4700
     ports:
       - ${HAPROXY_PORT:-80}:8080
       - ${HAPROXY_SSL_PORT:-443}:8443
@@ -73,11 +70,10 @@ services:
       - cardano-node-ogmios
       - kubo
       - nftcdn-server
-    profiles: [haproxy]
     shm_size: '2gb'
     volumes:
       - ./config/haproxy:/usr/local/etc/haproxy
-      #- /etc/ssl/ssl_key.pem:/ssl_key.pem
+      - /etc/ssl/ssl_key.pem:/ssl_key.pem
     restart: on-failure
     logging:
       driver: "json-file"
@@ -118,7 +114,7 @@ services:
     volumes:
       - cache:/home/node/app/cache
     ports:
-      - ${NFTCDN_SERVER_PORT:-4700}:4700
+      - 127.0.0.1:${NFTCDN_SERVER_PORT:-4700}:4700
     depends_on:
       - nftcdn-extractor
       - kubo
