@@ -212,7 +212,6 @@ services:
 
 # PREVIEW STACK ####################################################################################
 
-
   cardano-node-ogmios-preview:
     image: cardanosolutions/cardano-node-ogmios:v6.1.0_8.7.3-preview
     profiles: ["preview"]
@@ -282,7 +281,6 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
-
 
 volumes:
   ipfs_path:
