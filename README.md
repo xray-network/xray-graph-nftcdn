@@ -11,7 +11,7 @@
 ``` console
 git clone \
   https://github.com/xray-network/xray-graph-nftcdn.git \
-  && xray-graph-nftcdn
+  && cd xray-graph-nftcdn
 ```
 ``` console
 cp .env.example .env

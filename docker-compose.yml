@@ -1,16 +1,19 @@
 version: "3.8"
+name: nftcdn
 
 services:
   postgres:
-    image: postgres:${POSTGRES_VERSION:-16.1-alpine}
+    image: postgres:16.1-alpine
+    profiles: ["mainnet", "preprod", "preview"]
     env_file: ./.env
     environment:
       - POSTGRES_LOGGING=true
     ports:
-      - 127.0.0.1:${POSTGRES_PORT:-5432}:5432
+      - 127.0.0.1:5432:5432
     shm_size: '2gb'
     volumes:
       - ./config/postgresql/postgresql.conf:/etc/postgresql.conf
+      - ./config/postgresql/initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
       - postgres-data:/var/lib/postgresql/data
     command: [
       "-c", "config_file=/etc/postgresql.conf"
@@ -22,23 +25,9 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  cardano-node-ogmios:
-    image: cardanosolutions/cardano-node-ogmios:${OGMIOS_VERSION:-v6.1.0}_${CARDANO_NODE_VERSION:-8.7.3}-${NETWORK:-mainnet}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "400k"
-        max-file: "20"
-    ports:
-      - 127.0.0.1:${OGMIOS_PORT:-1337}:1337
-      - ${CARDANO_NODE_PORT:-3000}:3000
-    restart: on-failure
-    volumes:
-      - node-db:/db
-      - node-ipc:/ipc
-
   kubo:
-    image: ipfs/kubo:${KUBO_VERSION:-master-latest}
+    image: ipfs/kubo:master-latest
+    profiles: ["mainnet", "preprod", "preview"]
     volumes:
       - ipfs_path:/data/ipfs
       - ipfs_fuse:/ipfs
@@ -51,7 +40,7 @@ services:
       - 4001:4001/tcp
       - 4001:4001/udp
       - 127.0.0.1:5001:5001
-      - 127.0.0.1:${KUBO_PORT:-1882}:8080
+      - 127.0.0.1:1882:8080
     restart: on-failure
     logging:
       driver: "json-file"
@@ -61,15 +50,11 @@ services:
 
   haproxy:
     image: haproxy:2.8.3
-    environment:
-      - NETWORK=${NETWORK:-mainnet}
+    profiles: ["mainnet", "preprod", "preview"]
+    env_file: ./.env
     ports:
-      - ${HAPROXY_PORT:-80}:8080
-      - ${HAPROXY_SSL_PORT:-443}:8443
-    depends_on:
-      - cardano-node-ogmios
-      - kubo
-      - nftcdn-server
+      - 80:8080
+      - 443:8443
     shm_size: '2gb'
     volumes:
       - ./config/haproxy:/usr/local/etc/haproxy
@@ -81,19 +66,41 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  nftcdn-extractor:
+# MAINNET STACK ####################################################################################
+
+  cardano-node-ogmios-mainnet:
+    image: cardanosolutions/cardano-node-ogmios:v6.1.0_8.7.3-mainnet
+    profiles: ["mainnet"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    ports:
+      - 127.0.0.1:1337:1337
+      - 3000:3000
+    restart: on-failure
+    volumes:
+      - node-db-mainnet:/db
+      - node-ipc-mainnet:/ipc
+
+  nftcdn-extractor-mainnet:
+    profiles: ["mainnet"]
     build:
       context: .
       target: nftcdn-extractor
     env_file: ./.env
     volumes:
-      - cache:/home/node/app/cache
+      - cache-mainnet:/home/node/app/cache
     environment:
-      - NETWORK=${NETWORK:-mainnet}
-      - OGMIOS_HOST=cardano-node-ogmios
+      - NETWORK=mainnet
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_mainnet
+      - OGMIOS_HOST=cardano-node-ogmios-mainnet
       - OGMIOS_PORT=1337
     depends_on:
-      - cardano-node-ogmios
+      - cardano-node-ogmios-mainnet
       - postgres
     restart: on-failure
     logging:
@@ -102,21 +109,27 @@ services:
         max-size: "200k"
         max-file: "10"
 
-  nftcdn-server:
+  nftcdn-server-mainnet:
+    profiles: ["mainnet"]
     build:
       context: .
       target: nftcdn-server
     env_file: ./.env
     environment:
-      - NETWORK=${NETWORK:-mainnet}
+      - NETWORK=mainnet
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_mainnet
       - KUBO_HOST=kubo
       - KUBO_PORT=8080
+      - MAX_IMAGE_SIZE=2048
+      - SERVER_IMAGE_URL=
     volumes:
-      - cache:/home/node/app/cache
+      - cache-mainnet:/home/node/app/cache
     ports:
-      - 127.0.0.1:${NFTCDN_SERVER_PORT:-4700}:4700
+      - 127.0.0.1:4700:4700
     depends_on:
-      - nftcdn-extractor
+      - nftcdn-extractor-mainnet
       - kubo
     restart: on-failure
     logging:
@@ -125,11 +138,163 @@ services:
         max-size: "200k"
         max-file: "10"
 
+# PREPROD STACK ####################################################################################
+
+  cardano-node-ogmios-preprod:
+    image: cardanosolutions/cardano-node-ogmios:v6.1.0_8.7.3-preprod
+    profiles: ["preprod"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    ports:
+      - 127.0.0.1:1338:1337
+      - 3001:3000
+    restart: on-failure
+    volumes:
+      - node-db-preprod:/db
+      - node-ipc-preprod:/ipc
+
+  nftcdn-extractor-preprod:
+    profiles: ["preprod"]
+    build:
+      context: .
+      target: nftcdn-extractor
+    env_file: ./.env
+    volumes:
+      - cache-preprod:/home/node/app/cache
+    environment:
+      - NETWORK=preprod
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_preprod
+      - OGMIOS_HOST=cardano-node-ogmios-preprod
+      - OGMIOS_PORT=1337
+    depends_on:
+      - cardano-node-ogmios-preprod
+      - postgres
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  nftcdn-server-preprod:
+    profiles: ["preprod"]
+    build:
+      context: .
+      target: nftcdn-server
+    env_file: ./.env
+    environment:
+      - NETWORK=preprod
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_preprod
+      - KUBO_HOST=kubo
+      - KUBO_PORT=8080
+      - MAX_IMAGE_SIZE=2048
+      - SERVER_IMAGE_URL=
+    volumes:
+      - cache-preprod:/home/node/app/cache
+    ports:
+      - 127.0.0.1:4701:4700
+    depends_on:
+      - nftcdn-extractor-preprod
+      - kubo
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+# PREVIEW STACK ####################################################################################
+
+
+  cardano-node-ogmios-preview:
+    image: cardanosolutions/cardano-node-ogmios:v6.1.0_8.7.3-preview
+    profiles: ["preview"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    ports:
+      - 127.0.0.1:1339:1337
+      - 3002:3000
+    restart: on-failure
+    volumes:
+      - node-db-preview:/db
+      - node-ipc-preview:/ipc
+
+  nftcdn-extractor-preview:
+    profiles: ["preview"]
+    build:
+      context: .
+      target: nftcdn-extractor
+    env_file: ./.env
+    volumes:
+      - cache-preview:/home/node/app/cache
+    environment:
+      - NETWORK=preview
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_preview
+      - OGMIOS_HOST=cardano-node-ogmios-preview
+      - OGMIOS_PORT=1337
+    depends_on:
+      - cardano-node-ogmios-preview
+      - postgres
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  nftcdn-server-preview:
+    profiles: ["preview"]
+    build:
+      context: .
+      target: nftcdn-server
+    env_file: ./.env
+    environment:
+      - NETWORK=preview
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn_preview
+      - KUBO_HOST=kubo
+      - KUBO_PORT=8080
+      - MAX_IMAGE_SIZE=2048
+      - SERVER_IMAGE_URL=
+    volumes:
+      - cache-preview:/home/node/app/cache
+    ports:
+      - 127.0.0.1:4702:4700
+    depends_on:
+      - nftcdn-extractor-preview
+      - kubo
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+
 volumes:
-  node-db:
-  node-ipc:
   ipfs_path:
   ipfs_fuse:
   ipns_fuse:
   postgres-data:
-  cache:
+  node-db-mainnet:
+  node-db-preprod:
+  node-db-preview:
+  node-ipc-mainnet:
+  node-ipc-preprod:
+  node-ipc-preview:
+  cache-mainnet:
+  cache-preprod:
+  cache-preview:
