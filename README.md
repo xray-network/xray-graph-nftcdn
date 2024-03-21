@@ -7,6 +7,7 @@
 > Indexes metadata from `CIP-0025` (Media Token Metadata: TX Label 721), `CIP-0026` (Cardano Token Registry), `CIP-0027` (Royalties: TX Label 777), `CIP-0060` (Music Token), `CIP-0068` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format. Uses [Sharp](https://sharp.pixelplumbing.com/) for image processing.
 
 ## Getting Started
+### Prepare Installation
 
 ``` console
 git clone \
@@ -18,6 +19,8 @@ cp .env.example .env
 ```
   
 ### Build and Run via Docker Compose
+
+> You can combine profiles to run multiple networks on the same machine: `docker compose --profile mainnet --profile preprod --profile preview up -d`
   
 <details open>
   <summary><b>MAINNET</b></summary>
@@ -25,7 +28,7 @@ cp .env.example .env
 Default
 
 ``` console
-docker compose -p nftcdn-mainnet up -d --build
+docker compose --profile mainnet up -d
 ```
 
 </details>
@@ -36,19 +39,7 @@ docker compose -p nftcdn-mainnet up -d --build
 Default
 
 ``` console
-NETWORK=preprod docker compose -p nftcdn-preprod up -d --build
-```
-
-Advanced usage (ports mapping, in case you are using multiple instances on the same server)
-
-``` console
-NETWORK=preprod \
-CARDANO_NODE_PORT=3001 \
-POSTGRES_PORT=5433 \
-OGMIOS_PORT=1338 \
-KUBO_PORT=1883 \
-NFTCDN_SERVER_PORT=4701 \
-docker compose -p nftcdn-preprod up -d --build
+docker compose --profile preprod up -d
 ```
 
 </details>
@@ -59,19 +50,7 @@ docker compose -p nftcdn-preprod up -d --build
 Default
 
 ``` console
-NETWORK=preview docker compose -p nftcdn-preview up -d --build
-```
-
-Advanced usage (ports mapping, in case you are using multiple instances on the same server)
-
-``` console
-NETWORK=preview \
-CARDANO_NODE_PORT=3002 \
-POSTGRES_PORT=5434 \
-OGMIOS_PORT=1339 \
-KUBO_PORT=1884 \
-NFTCDN_SERVER_PORT=4702 \
-docker compose -p nftcdn-preview up -d --build
+docker compose --profile preview up -d
 ```
 
 </details>
@@ -94,118 +73,6 @@ docker compose -p nftcdn-preview up -d --build
 
   
 ## Advanced Usage
- 
-<details>
-  <summary>External Ogmios Cardano Node and Kubo</summary>
-
-You can pass `OGMIOS_HOST` and `KUBO_HOST` in case these instances are hosted on different servers.
-  
-<details open>
-  <summary><b>MAINNET</b></summary>
-
-Default
-
-``` console
-OGMIOS_PORT=1337 \
-KUBO_PORT=1882 \
-docker compose -f docker-compose.external.yml -p nftcdn-mainnet up -d --build
-```
-With HAProxy
-
-``` console
-OGMIOS_PORT=1337 \
-KUBO_PORT=1882 \
-docker compose -f docker-compose.external.yml --profile haproxy -p nftcdn-mainnet up -d --build
-```
-
-</details>
-  
-<details>
-  <summary><b>PREPROD</b></summary>
-
-Default
-
-``` console
-NETWORK=preprod \
-POSTGRES_PORT=5553
-OGMIOS_PORT=1338 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4701 \
-docker compose -f docker-compose.external.yml -p nftcdn-preprod up -d --build
-```
-
-With HAProxy
-
-``` console
-NETWORK=preprod \
-POSTGRES_PORT=5553
-OGMIOS_PORT=1338 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4701 \
-docker compose -f docker-compose.external.yml --profile haproxy -p nftcdn-preprod up -d --build
-```
-
-Advanced usage (ports mapping, in case you are using multiple instances on the same server)
-
-``` console
-NETWORK=preprod \
-POSTGRES_PORT=5553
-OGMIOS_PORT=1338 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4701 \
-docker compose -f docker-compose.external.yml -p preprod -p nftcdn-preprod up -d --build
-```
-
-</details>
-  
-<details>
-  <summary><b>PREVIEW</b></summary>
-
-Default
-
-``` console
-NETWORK=preview \
-POSTGRES_PORT=5534
-OGMIOS_PORT=1339 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4702 \
-docker compose -f docker-compose.external.yml -p nftcdn-preview up -d --build
-```
-
-With HAProxy
-
-``` console
-NETWORK=preview \
-POSTGRES_PORT=5534
-OGMIOS_PORT=1339 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4702 \
-docker compose -f docker-compose.external.yml -p nftcdn-preview --profile haproxy up -d --build
-```
-
-Advanced usage (ports mapping, in case you are using multiple instances on the same server)
-
-``` console
-NETWORK=preview \
-POSTGRES_PORT=5534
-OGMIOS_PORT=1339 \
-KUBO_PORT=1882 \
-NFTCDN_SERVER_PORT=4702 \
-docker compose -f docker-compose.external.yml -p preview -p nftcdn-preview up -d --build
-```
-
-</details>
-
-</details>
-
-<details>
-  <summary>Env Variables</summary>
-  
-* `POSTGRES_PASSWORD=your_secret_password` change it from default
-* `MAX_IMAGE_SIZE=2048` maximum image size in case of caching (`?size=256` query string)
-* `SERVER_IMAGE_URL=` prefix in image URLs from metadata, default `https://graph.xray.app/output/nftcdn/${NETWORK}/api/v1`
-
-</details>
 
 <details>
   <summary>HAProxy Config</summary>
