@@ -25,8 +25,6 @@ cp .env.example .env
 <details open>
   <summary><b>MAINNET</b></summary>
 
-Default
-
 ``` console
 docker compose --profile mainnet up -d
 ```
@@ -36,8 +34,6 @@ docker compose --profile mainnet up -d
 <details>
   <summary><b>PREPROD</b></summary>
 
-Default
-
 ``` console
 docker compose --profile preprod up -d
 ```
@@ -46,8 +42,6 @@ docker compose --profile preprod up -d
   
 <details>
   <summary><b>PREVIEW</b></summary>
-
-Default
 
 ``` console
 docker compose --profile preview up -d
