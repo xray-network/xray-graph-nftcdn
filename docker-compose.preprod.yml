@@ -1,0 +1,99 @@
+services:
+  postgres-preprod:
+    image: postgres:16.1-alpine
+    profiles: ["preprod"]
+    env_file: ./.env
+    environment:
+      - POSTGRES_LOGGING=true
+      - POSTGRES_DB=nftcdn
+    ports:
+      - 127.0.0.1:5433:5432
+    shm_size: '2gb'
+    volumes:
+      - ./config/postgresql/postgresql.testnet.conf:/etc/postgresql.conf
+      - postgres-data-preprod:/var/lib/postgresql/data
+    command: [
+      "-c", "config_file=/etc/postgresql.conf"
+    ]
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  cardano-node-ogmios-preprod:
+    image: cardanosolutions/cardano-node-ogmios:v6.1.0_8.7.3-preprod
+    profiles: ["preprod"]
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "400k"
+        max-file: "20"
+    ports:
+      - 127.0.0.1:1338:1337
+      - 3001:3000
+    restart: on-failure
+    volumes:
+      - node-db-preprod:/db
+      - node-ipc-preprod:/ipc
+
+  nftcdn-extractor-preprod:
+    profiles: ["preprod"]
+    build:
+      context: .
+      target: nftcdn-extractor
+    env_file: ./.env
+    volumes:
+      - cache-preprod:/home/node/app/cache
+    environment:
+      - NETWORK=preprod
+      - POSTGRES_HOST=postgres-preprod
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn
+      - OGMIOS_HOST=cardano-node-ogmios-preprod
+      - OGMIOS_PORT=1337
+    depends_on:
+      - cardano-node-ogmios-preprod
+      - postgres-preprod
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+  nftcdn-server-preprod:
+    profiles: ["preprod"]
+    build:
+      context: .
+      target: nftcdn-server
+    env_file: ./.env
+    environment:
+      - NETWORK=preprod
+      - POSTGRES_HOST=postgres-preprod
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=nftcdn
+      - KUBO_HOST=kubo
+      - KUBO_PORT=8080
+      - MAX_IMAGE_SIZE=2048
+      - SERVER_IMAGE_URL=
+    volumes:
+      - cache-preprod:/home/node/app/cache
+    ports:
+      - 127.0.0.1:4701:4700
+    depends_on:
+      - nftcdn-extractor-preprod
+      - kubo
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  postgres-data-preprod:
+  node-db-preprod:
+  node-ipc-preprod:
+  cache-preprod:
