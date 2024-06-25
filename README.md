@@ -71,6 +71,10 @@ docker compose --profile preview up -d
 | GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit= &offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
 | GET | /ipfs/:cid |  | IPFS gateway proxy |
 
+
+## TypeScript Client
+  
+We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https://github.com/xray-network/cardano-nftcdn-client) repo for more information.
   
 ## Advanced Usage
 
@@ -98,16 +102,4 @@ docker compose --profile preview up -d
 * Tune settings: [https://pgtune.leopard.in.ua](https://pgtune.leopard.in.ua)
 
 </details>
-
-## System Requirements
-  
-Since this instance uses Postgres as a database and works with cached images (resizing), the emphasis should be on a productive processor (the more cores, the better - sharp automatically divides the load by cores during resizing) and SSD disk:
-
-* Any of the big well known Linux distributions (eg, Debian, Ubuntu, RHEL, CentOS, Arch etc).
-* 64 Gigabytes of RAM or more.
-* 4 CPU cores or more.
-* Ensure that the machine has sufficient IOPS (Input/Output Operations per Second). Ie it should be 100k IOPS or better. Lower IOPS ratings will result in slower sync times and/or falling behind the chain tip.
-* Minimum 1000 Gigabytes or more of SSD disk storage.
-  
-When building an application that will be querying the database, remember that for fast queries, low latency disk access is far more important than high throughput (assuming the minimal IOPS above is met).
 
