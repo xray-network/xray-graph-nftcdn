@@ -1,6 +1,6 @@
 <a href="https://discord.gg/WhZmm46APN"><img alt="Discord" src="https://img.shields.io/discord/852538978946383893?style=for-the-badge&logo=discord&label=Discord&labelColor=%231940ED&color=%233FCB9B"></a>
 
-# XRAY/Graph NFTCDN — Dockerized Metadata/Datums indexer with IPFS gateway
+# XRAY/Graph NFTCDN — Dockerized Metadata/Datums indexer & Image Server with IPFS gateway
 
 XRAY/Graph NFTCDN is a tool for fast and predictable deployment of Cardano Tokens Metadata/Datums Indexer ([Ogmios](https://ogmios.dev/)-based) & Image Resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)), and [Haproxy](https://www.haproxy.org/) (TCP/HTTP Load Balancer) stack in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider.
 
