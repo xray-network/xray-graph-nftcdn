@@ -7,7 +7,9 @@ export default metadata
 
 metadata.get("/:id", async (req, res) => {
   try {
-    const assetId = [req.params.id.split(".")[0], req.params.id.split(".")[1]]
+    const assetIdRaw = req.params.id
+    const assetId = [req.params.id.slice(0, 56), req.params.id.slice(56)]
+
     const response = (await getAssetsMetadata([assetId])).data || []
     if (!response.length) {
       res.status(404).send(`Metadata Not Found`)
@@ -23,6 +25,7 @@ metadata.get("/:id", async (req, res) => {
 metadata.post("/", async (req, res) => {
   try {
     const { _asset_list } = req.body
+    
     const response = (await getAssetsMetadata(_asset_list)).data || []
     if (!response.length) {
       res.status(404).send(`Metadata Not Found`)

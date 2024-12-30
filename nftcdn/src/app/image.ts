@@ -20,10 +20,8 @@ const CIP68_CACHE_FOLDER = "./cache/cip68"
 
 image.get("/:id", async (req, res) => {
   try {
-    const assetId = [req.params.id.split(".")[0], req.params.id.split(".")[1]]
-    const assetIdRaw = assetId.join(".")
-
-    console.log(IMAGE_SIZES)
+    const assetIdRaw = req.params.id
+    const assetId = [req.params.id.slice(0, 56), req.params.id.slice(56)]
 
     const crop = req.query.crop === "true"
     const prefer = req.query.prefer as "cip25" | "cip26" | "cip68" | undefined
