@@ -1,18 +1,16 @@
 import express from "express"
 import fs from "fs"
 import sharp from "sharp"
-import { sql, desc, asc, eq, ne, like } from "drizzle-orm"
-import { db, schema } from "../../db"
-import { logger } from "../../utils"
-import * as Utils from "../../utils"
-import * as Types from "../../types"
-import * as Kubo from "../../services/kubo"
-import { MAX_IMAGE_SIZE } from "../../config/vars"
-import { getAssetImageMetadata } from "./"
+import { logger } from "../utils"
+import * as Utils from "../utils"
+import * as Types from "../types"
+import { getImage } from "../services/kubo"
+import { getAssetsMetadata } from "../services/koios"
+import { IMAGE_SIZES, IMAGE_FORMATS } from "../config"
 
-export const image = express.Router()
+const image = express.Router()
+export default image
 
-const IMAGE_FORMATS: Types.MediaTypes[] = ["jpeg", "png", "webp", "gif", "svg"]
 const CIP25_CACHE_FOLDER = "./cache/cip25"
 const CIP26_CACHE_FOLDER = "./cache/cip26"
 const CIP68_CACHE_FOLDER = "./cache/cip68"
@@ -20,87 +18,65 @@ const CIP68_CACHE_FOLDER = "./cache/cip68"
 !fs.existsSync(CIP26_CACHE_FOLDER) && fs.mkdirSync(CIP26_CACHE_FOLDER, { recursive: true })
 !fs.existsSync(CIP68_CACHE_FOLDER) && fs.mkdirSync(CIP68_CACHE_FOLDER, { recursive: true })
 
-image.get("/:fingerprint", async (req, res) => {
+image.get("/:id", async (req, res) => {
   try {
-    const fingerprint = req.params.fingerprint
+    const assetId = [req.params.id.split(".")[0], req.params.id.split(".")[1]]
+    const assetIdRaw = assetId.join(".")
+
+    console.log(IMAGE_SIZES)
+
     const crop = req.query.crop === "true"
-    const select = req.query.select
+    const prefer = req.query.prefer as "cip25" | "cip26" | "cip68" | undefined
     const size = isNaN(Number(req.query.size)) ? "original" : Number(req.query.size)
     const webpSupported = req.headers.accept?.includes("image/webp")
 
-    if (size !== "original" && size > MAX_IMAGE_SIZE) {
-      res.status(400).send(`Invalid Request :: size > ${MAX_IMAGE_SIZE}, should be <= ${MAX_IMAGE_SIZE}`)
+    if (size !== "original" && !IMAGE_SIZES.includes(size)) {
+      res.status(400).send(`Invalid Request :: Select correct size :: ${IMAGE_SIZES.join(", ")}`)
       return
     }
 
-    const asset = await getAssetImageMetadata(fingerprint)
-
-    if (!asset) {
-      res.status(404).send(`Image Not Found :: ${fingerprint}`)
+    const assetMetadata = (await getAssetsMetadata([assetId]))?.data?.[0]
+    if (!assetMetadata) {
+      res.status(404).send(`Image Not Found :: ${assetIdRaw}`)
       return
     }
 
-    const cip25_metadata = asset?.cip25 ? Utils.JSONBigStringifiedBigInt(asset?.cip25) : null
-    const cip26_metadata = asset?.cip26.fingerprint ? asset?.cip26 : null
-    const cip68_datum = asset?.cip68 ? Utils.JSONBigStringifiedBigInt(asset?.cip68) : null
+    const policy_id = assetMetadata?.policy_id!
+    const asset_name_ascii = assetMetadata?.asset_name_ascii!
 
-    const transformMetadata = (metadata: any, fields: string[]) => {
-      const updatedFields = fields.reduce((acc, field) => {
-        const rawField = metadata?.[field]
-        if (rawField) {
-          const finalField = Array.isArray(rawField) ? rawField.join("") : rawField
-          if (typeof finalField === "string") {
-            acc[field] = finalField
-          } else {
-            acc[field] = undefined
-          }
-        }
-        return acc
-      }, {} as any)
-      return updatedFields
-    }
+    const cip25_metadata = assetMetadata.minting_tx_metadata?.[721]?.[policy_id]?.[asset_name_ascii]
+    const cip26_metadata = assetMetadata.token_registry_metadata
+    const cip68_metadata_raw =
+      assetMetadata.cip68_metadata?.[222] ||
+      assetMetadata.cip68_metadata?.[333] ||
+      assetMetadata.cip68_metadata?.[444] ||
+      assetMetadata.cip68_metadata?.[100]
+    const cip68_metadata = cip68_metadata_raw ? Utils.parsePlutusJsonData(cip68_metadata_raw)?.[0] : undefined
 
-    const cip25_images = transformMetadata(cip25_metadata, ["image"])
-    const cip26_images = transformMetadata(cip26_metadata, ["logo"])
-    const cip68_images = transformMetadata(cip68_datum, ["image", "logo"])
+    const cip25_images = Utils.joinMetadata(cip25_metadata, ["image"])
+    const cip26_images = Utils.joinMetadata(cip26_metadata, ["logo"])
+    const cip68_images = Utils.joinMetadata(cip68_metadata, ["image", "logo"])
 
     const imageData = (() => {
-      if (select === "cip68") {
+      const imageSources = {
+        cip68: cip68_images.image || cip68_images.logo,
+        cip25: cip25_images.image,
+        cip26: cip26_images.logo,
+      }
+
+      if (prefer && imageSources[prefer]) {
         return {
-          type: "cip68",
-          value: cip68_images.image || cip68_images.logo,
+          type: prefer,
+          value: imageSources[prefer],
         }
       }
-      if (select === "cip25") {
-        return {
-          type: "cip25",
-          value: cip25_images.image,
+
+      for (const [type, value] of Object.entries(imageSources)) {
+        if (value) {
+          return { type, value }
         }
       }
-      if (select === "cip26") {
-        return {
-          type: "cip26",
-          value: cip26_images.logo,
-        }
-      }
-      if (cip68_images?.image || cip68_images?.logo) {
-        return {
-          type: "cip68",
-          value: cip68_images.image || cip68_images.logo,
-        }
-      }
-      if (cip25_images?.image) {
-        return {
-          type: "cip25",
-          value: cip25_images.image,
-        }
-      }
-      if (cip26_images?.logo) {
-        return {
-          type: "cip26",
-          value: cip26_images.logo,
-        }
-      }
+
       return null
     })()
 
@@ -133,6 +109,7 @@ image.get("/:fingerprint", async (req, res) => {
         }
       }
 
+      // Remote Image Processing
       const processRemote = async (imageResponse: Response, cache: boolean) => {
         const contentType = (imageResponse.headers.get("content-type") || "")?.split("/")
         const typeRaw = contentType[0] as any
@@ -172,9 +149,10 @@ image.get("/:fingerprint", async (req, res) => {
 
       const imageProvider = Utils.getImageProvider(imageData?.value)
 
+      // IPFS Image Processing
       if (imageProvider?.type === "ipfs" && imageProvider.value) {
         try {
-          const imageResponse = await Kubo.getImage(imageProvider.value)
+          const imageResponse = await getImage(imageProvider.value)
           if (imageResponse.ok) {
             await processRemote(imageResponse, true)
             return
@@ -185,6 +163,8 @@ image.get("/:fingerprint", async (req, res) => {
           return
         }
       }
+
+      // HTTP Image Processing
       if (imageProvider?.type === "http" && imageProvider.value) {
         try {
           if (size === "original") {
@@ -203,6 +183,8 @@ image.get("/:fingerprint", async (req, res) => {
           return
         }
       }
+
+      // Base64 Image Processing
       if (imageProvider?.type === "base64" && imageProvider.value) {
         try {
           const sharpImage = sharp(Buffer.from(imageProvider.value, "base64"), {
@@ -229,7 +211,7 @@ image.get("/:fingerprint", async (req, res) => {
       }
     }
 
-    res.status(404).send(`Image Server :: Error :: Image Not Found :: ${fingerprint}`)
+    res.status(404).send(`Image Server :: Error :: Image Not Found :: ${assetIdRaw}`)
   } catch (error: any) {
     logger(`Error :: ${JSON.stringify(error?.message)} :: ${JSON.stringify(error)}`)
     res.status(500).send("Internal Server Error")

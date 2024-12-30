@@ -1,11 +1,12 @@
 import express from "express"
 import { logger } from "./utils"
-import { assets, image, ipfs, metadata } from "./app/server"
+import image from "./app/image"
+import metadata from "./app/metadata"
+import ipfs from "./app/ipfs"
 
 export const app = express()
 
 app.use(express.json())
-app.use("/assets", assets)
 app.use("/image", image)
 app.use("/metadata", metadata)
 app.use("/ipfs", ipfs)

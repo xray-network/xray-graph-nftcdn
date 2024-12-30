@@ -1,6 +1,6 @@
 {
   "name": "xray-graph-nftcdn",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Cardano native tokens metadata/datums indexer/explorer and images CDN. IPFS gateway included.",
   "repository": {
     "type": "git",
@@ -13,16 +13,9 @@
   },
   "homepage": "https://graph.xray.app",
   "scripts": {
-    "start:extractor": "NODE_PATH=./build node build/src/extractor.js",
-    "dev:extractor": "nodemon src/extractor.ts",
-    "start:server": "NODE_PATH=./build node build/src/server.js",
-    "dev:server": "nodemon src/server.ts",
+    "start": "NODE_PATH=./build node build/src/index.js",
+    "dev": "nodemon src/index.ts",
     "build": "rm -rf ./build && tsc -p .",
-    "db:delete": "rm -rf src/db/migrations",
-    "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "ts-node src/db/scripts/migrate",
-    "db:drop": "ts-node src/db/scripts/drop",
-    "db": "yarn db:delete && yarn db:drop && yarn db:generate && yarn db:migrate",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,md,scss,css}\""
   },
@@ -35,26 +28,17 @@
   },
   "dependencies": {
     "@cardano-ogmios/client": "^6.0.1",
-    "@cardanosolutions/json-bigint": "^1.0.1",
-    "@dcspark/cardano-multiplatform-lib-nodejs": "^4.0.2",
     "@emurgo/cip14-js": "^3.0.1",
+    "cardano-koios-client": "^1.0.7",
     "dotenv": "^16.3.2",
-    "drizzle-kit": "^0.20.14",
-    "drizzle-orm": "^0.29.4",
     "express": "^4.18.2",
     "is-ipfs": "^6.0.2",
     "js-sha256": "^0.11.0",
-    "libsql": "^0.2.0-pre.7",
-    "node-cron": "^3.0.3",
-    "postgres": "^3.4.3",
     "prettier": "^3.2.4",
-    "sharp": "^0.33.2",
-    "simple-git": "^3.22.0"
+    "sharp": "^0.33.5"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.8",
     "@types/express": "^4.17.21",
-    "@types/node-cron": "^3.0.11",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
