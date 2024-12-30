@@ -1,10 +1,10 @@
 <a href="https://discord.gg/WhZmm46APN"><img alt="Discord" src="https://img.shields.io/discord/852538978946383893?style=for-the-badge&logo=discord&label=Discord&labelColor=%231940ED&color=%233FCB9B"></a>
 
-# XRAY | Graph | NFTCDN — Cardano Tokens Metadata Explorer & Images CDN
+# XRAY/Graph NFTCDN — Dockerized Metadata/Datums indexer & Image Server with IPFS gateway
 
-> [!NOTE]
-> XRAY | Graph | NFTCDN is a dockered Cardano native tokenes metadata/datums indexer/explorer API tool and images CDN with IPFS gateway, based on [Ogmios](https://ogmios.dev/) and [Kubo](https://github.com/ipfs/kubo).
-> Indexes metadata from `CIP-0025` (Media Token Metadata: TX Label 721), `CIP-0026` (Cardano Token Registry), `CIP-0027` (Royalties: TX Label 777), `CIP-0060` (Music Token), `CIP-0068` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format. Uses [Sharp](https://sharp.pixelplumbing.com/) for image processing.
+XRAY/Graph NFTCDN is a tool for fast and predictable deployment of Cardano Tokens Metadata/Datums Indexer ([Ogmios](https://ogmios.dev/)-based) & Image Resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)), and [Haproxy](https://www.haproxy.org/) (TCP/HTTP Load Balancer) stack in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider.
+
+Indexes metadata from `CIP-0025` (Media Token Metadata: TX Label 721), `CIP-0026` (Cardano Token Registry), `CIP-0027` (Royalties: TX Label 777), `CIP-0060` (Music Token), `CIP-0068` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format.
 
 ## Getting Started
 ### Prepare Installation
@@ -49,6 +49,12 @@ docker compose --profile preview up -d
 
 </details>
 
+## Documentation
+
+* NFTCDN — See Endpoints List below
+* Kubo — https://github.com/ipfs/kubo/
+* Ogmios — https://ogmios.dev/
+* Haproxy — https://www.haproxy.org/
 
 ## Endpoints List
   
@@ -65,6 +71,10 @@ docker compose --profile preview up -d
 | GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit= &offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
 | GET | /ipfs/:cid |  | IPFS gateway proxy |
 
+
+## TypeScript Client
+  
+We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https://github.com/xray-network/cardano-nftcdn-client) repo for more information.
   
 ## Advanced Usage
 
@@ -92,16 +102,4 @@ docker compose --profile preview up -d
 * Tune settings: [https://pgtune.leopard.in.ua](https://pgtune.leopard.in.ua)
 
 </details>
-
-## System Requirements
-  
-Since this instance uses Postgres as a database and works with cached images (resizing), the emphasis should be on a productive processor (the more cores, the better - sharp automatically divides the load by cores during resizing) and SSD disk:
-
-* Any of the big well known Linux distributions (eg, Debian, Ubuntu, RHEL, CentOS, Arch etc).
-* 64 Gigabytes of RAM or more.
-* 4 CPU cores or more.
-* Ensure that the machine has sufficient IOPS (Input/Output Operations per Second). Ie it should be 100k IOPS or better. Lower IOPS ratings will result in slower sync times and/or falling behind the chain tip.
-* Minimum 1000 Gigabytes or more of SSD disk storage.
-  
-When building an application that will be querying the database, remember that for fast queries, low latency disk access is far more important than high throughput (assuming the minimal IOPS above is met).
 
