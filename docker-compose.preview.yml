@@ -1,67 +1,5 @@
 services:
-  postgres-preview:
-    image: postgres:16.1-alpine
-    profiles: ["preview"]
-    env_file: ./.env
-    environment:
-      - POSTGRES_LOGGING=true
-    ports:
-      - 127.0.0.1:5434:5432
-    shm_size: '2gb'
-    volumes:
-      - ./config/postgresql/postgresql.testnet.conf:/etc/postgresql.conf
-      - postgres-data-preview:/var/lib/postgresql/data
-    command: [
-      "-c", "config_file=/etc/postgresql.conf"
-    ]
-    restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
-  cardano-node-ogmios-preview:
-    image: cardanosolutions/cardano-node-ogmios:v6.10.0_10.1.3-preview
-    profiles: ["preview"]
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "400k"
-        max-file: "20"
-    ports:
-      - 127.0.0.1:1339:1337
-      - 3002:3000
-    restart: on-failure
-    volumes:
-      - node-db-preview:/db
-      - node-ipc-preview:/ipc
-
-  nftcdn-extractor-preview:
-    profiles: ["preview"]
-    build:
-      context: .
-      target: nftcdn-extractor
-    env_file: ./.env
-    volumes:
-      - cache-preview:/home/node/app/cache
-    environment:
-      - NETWORK=preview
-      - POSTGRES_HOST=postgres-preview
-      - POSTGRES_PORT=5432
-      - OGMIOS_HOST=cardano-node-ogmios-preview
-      - OGMIOS_PORT=1337
-    depends_on:
-      - cardano-node-ogmios-preview
-      - postgres-preview
-    restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
-  nftcdn-server-preview:
+  nftcdn-preview:
     profiles: ["preview"]
     build:
       context: .
@@ -69,18 +7,11 @@ services:
     env_file: ./.env
     environment:
       - NETWORK=preview
-      - POSTGRES_HOST=postgres-preview
-      - POSTGRES_PORT=5432
-      - KUBO_HOST=kubo
-      - KUBO_PORT=8080
-      - MAX_IMAGE_SIZE=2048
-      - SERVER_IMAGE_URL=
     volumes:
       - cache-preview:/home/node/app/cache
     ports:
       - 127.0.0.1:4702:4700
     depends_on:
-      - nftcdn-extractor-preview
       - kubo
     restart: on-failure
     logging:
@@ -90,7 +21,4 @@ services:
         max-file: "10"
 
 volumes:
-  postgres-data-preview:
-  node-db-preview:
-  node-ipc-preview:
   cache-preview:

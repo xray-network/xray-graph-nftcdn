@@ -1,49 +1,19 @@
-import * as CML from "@dcspark/cardano-multiplatform-lib-nodejs"
 import AssetFingerprint from "@emurgo/cip14-js"
 import * as Types from "../types"
-import { networkId, shelleyStart, networkOffset, labelType } from "../config/params"
+import { labelType } from "../config"
 import { crc8 } from "./crc8"
 import * as isIPFS from "is-ipfs"
 import { sha224, sha256 } from "js-sha256"
-// @ts-ignore
-import JSONBig from "@cardanosolutions/json-bigint"
 
 export const logger = (output: string) => {
   console.log(`${new Date().toISOString()} — ${output}`)
-}
-
-export const JSONBigStringifiedBigInt = (data: any) => {
-  try {
-    return data ? JSON.parse(JSON.stringify(JSONBig.parse(data))) : undefined
-  } catch (error) {
-    logger(`Cardano Lib Error :: JSONBigStringToJsonStringify :: ${error}`)
-    return undefined
-  }
-}
-
-export const JSONBigStringify = (data: any) => {
-  try {
-    return data ? JSONBig.stringify(data) : undefined
-  } catch (error) {
-    logger(`Cardano Lib Error :: JSONBigStringify :: ${error}`)
-    return undefined
-  }
-}
-
-export const JSONBigParse = (data: any) => {
-  try {
-    return data ? JSONBig.parse(data) : undefined
-  } catch (error) {
-    logger(`Cardano Lib Error :: JSONBigParse :: ${error}`)
-    return undefined
-  }
 }
 
 export const getSha224 = (message: string) => {
   try {
     return message ? sha224(message) : undefined
   } catch (error) {
-    logger(`Cardano Lib Error :: getSha256 :: ${error}`)
+    logger(`Server :: getSha256 :: ${error}`)
     return undefined
   }
 }
@@ -52,61 +22,7 @@ export const getSha256 = (message: string) => {
   try {
     return message ? sha256(message) : undefined
   } catch (error) {
-    logger(`Cardano Lib Error :: getSha256 :: ${error}`)
-    return undefined
-  }
-}
-
-export const plutusDataToJsValue = (datum: string) => {
-  try {
-    return JSON.parse(CML.decode_plutus_datum_to_json_str(CML.PlutusData.from_cbor_hex(datum), 1))
-  } catch (error) {
-    logger(`Cardano Lib Error :: plutusDataToJsValue :: ${error}`)
-    return undefined
-  }
-}
-
-export const plutusDataToJson = (datum: string) => {
-  try {
-    return JSON.parse(CML.decode_plutus_datum_to_json_str(CML.PlutusData.from_cbor_hex(datum), 0))
-  } catch (error) {
-    logger(`Cardano Lib Error :: plutusDataToJson :: ${error}`)
-    return undefined
-  }
-}
-
-export function parsePlutusJsonData(input: any, preventEncode?: boolean): any {
-  try {
-    if (input.hasOwnProperty("bytes")) {
-      return preventEncode ? input.bytes : Buffer.from(input.bytes, "hex").toString()
-    } else if (input.hasOwnProperty("int")) {
-      return BigInt(input.int)
-    } else if (input.hasOwnProperty("map")) {
-      const obj: any = {}
-      input.map.forEach((item: any) => {
-        const preventKeys = ["sha256"]
-        const key = parsePlutusJsonData(item.k)
-        const value = parsePlutusJsonData(item.v, preventKeys.includes(key))
-        obj[key] = value
-      })
-      return obj
-    } else if (input.hasOwnProperty("list")) {
-      return input.list.map(parsePlutusJsonData)
-    } else if (input.hasOwnProperty("fields")) {
-      return input.fields.map(parsePlutusJsonData)
-    }
-    return input
-  } catch (error) {
-    logger(`Cardano Lib Error :: parsePlutusJsonData :: ${error}`)
-    return undefined
-  }
-}
-
-export const hashPlutusData = (datum: string) => {
-  try {
-    return CML.hash_plutus_data(CML.PlutusData.from_cbor_hex(datum)).to_hex()
-  } catch (error) {
-    logger(`Cardano Lib Error :: hashPlutusData :: ${error}`)
+    logger(`Server :: getSha256 :: ${error}`)
     return undefined
   }
 }
@@ -139,7 +55,7 @@ export const generateFingerprint = (policyId: string, assetName?: string) => {
     const fingerprint = AssetFingerprint.fromParts(Buffer.from(policyId, "hex"), Buffer.from(assetName || "", "hex"))
     return fingerprint.fingerprint()
   } catch (error) {
-    logger(`Cardano Lib Error :: generateFingerprint :: ${error}`)
+    logger(`Server :: generateFingerprint :: ${error}`)
     return undefined
   }
 }
@@ -161,90 +77,7 @@ export const generateCip68Ref = (policyId: string, assetName?: string) => {
       return undefined
     }
   } catch (error) {
-    logger(`Cardano Lib Error :: generateCip68Ref :: ${error}`)
-    return undefined
-  }
-}
-
-export const decodeAssetName = (assetName: string) => {
-  try {
-    const decode = (assetName: string) => {
-      const labelHex = (assetName || "").substring(0, 8)
-      const assetNameHex = (assetName || "").substring(8)
-      const label = cip67FromLabel(labelHex)
-      if (label) {
-        return {
-          assetNameAsciiNoLabel: Buffer.from(assetNameHex || "", "hex").toString("utf-8") || "",
-          label: labelHex,
-          labelAscii: label,
-          labelType: labelType(label),
-        }
-      } else {
-        return undefined
-      }
-    }
-    const decoded = decode(assetName)
-    const assetNameAscii = Buffer.from(assetName || "", "hex").toString("utf-8") || ""
-    const assetNameAsciiNoLabel = decoded?.assetNameAsciiNoLabel || assetNameAscii
-    const format = /^([/\\\[\]*<>(),.!?@+=%&$#^'"|a-zA-Z0-9 _-]+)$/
-    const assetNameFormatted = format.test(assetNameAsciiNoLabel) ? assetNameAsciiNoLabel : assetName
-    const assetNameFull = (decoded?.label ? `(${decoded?.labelAscii}) ` : "") + assetNameFormatted
-    return {
-      assetName: assetName,
-      assetNameAscii: assetNameAscii,
-      assetNameAsciiNoLabel: assetNameAsciiNoLabel,
-      assetNameFormatted: assetNameFormatted,
-      assetNameFull: assetNameFull,
-      label: decoded?.label,
-      labelAscii: decoded?.labelAscii,
-      labelType: decoded?.labelType,
-    }
-  } catch (error) {
-    logger(`Cardano Lib Error :: decodeAssetName :: ${error}`)
-    return undefined
-  }
-}
-
-export const getStakeKeyFromAddress = (address?: string, network?: Types.Network) => {
-  try {
-    if (address && network) {
-      if (networkId(network) === undefined) throw new Error("Wrong Network")
-      if (CML.ByronAddress.is_valid(address)) return undefined
-      const stakeCredential = CML.Address.from_bech32(address).staking_cred()
-      return stakeCredential
-        ? CML.RewardAddress.new(networkId(network), stakeCredential).to_address().to_bech32()
-        : undefined
-    } else {
-      return undefined
-    }
-  } catch (error) {
-    logger(`Cardano Lib Error :: getStakeKeyFromAddress :: ${error}`)
-    return undefined
-  }
-}
-
-export const timestampFromSlot = (slot?: number, network?: Types.Network) => {
-  try {
-    if (slot && network) {
-      return new Date((slot - shelleyStart(network) + networkOffset(network)) * 1000).toISOString()
-    } else {
-      return undefined
-    }
-  } catch (error) {
-    logger(`Cardano Lib Error :: timestampFromSlot :: ${error}`)
-    return undefined
-  }
-}
-
-export const slotFromTimestamp = (timestamp?: string, network?: Types.Network) => {
-  try {
-    if (timestamp && network) {
-      return Math.floor(new Date(timestamp).getTime() / 1000) + shelleyStart(network) - networkOffset(network)
-    } else {
-      return undefined
-    }
-  } catch (error) {
-    logger(`Cardano Lib Error :: slotFromTimestamp :: ${error}`)
+    logger(`Server :: generateCip68Ref :: ${error}`)
     return undefined
   }
 }
@@ -264,7 +97,7 @@ export const extractCid = (imageUrl: string) => {
       cid: detected ? cid : undefined,
     }
   } catch (error) {
-    logger(`Cardano Lib Error :: extractCid :: ${error}`)
+    logger(`Server :: extractCid :: ${error}`)
     return undefined
   }
 }
@@ -301,7 +134,50 @@ export const getImageProvider = (imageUrl: string) => {
       }
     }
   } catch (error) {
-    logger(`Cardano Lib Error :: getImageProvider :: ${error}`)
+    logger(`Server :: getImageProvider :: ${error}`)
     return undefined
   }
+}
+
+export function parsePlutusJsonData(input: any, bigintAsString?: boolean, rawBytes?: boolean): any {
+  try {
+    if (input.hasOwnProperty("bytes")) {
+      return rawBytes ? input.bytes : Buffer.from(input.bytes, "hex").toString()
+    } else if (input.hasOwnProperty("int")) {
+      return bigintAsString ? input.int : BigInt(input.int)
+    } else if (input.hasOwnProperty("map")) {
+      const obj: any = {}
+      input.map.forEach((item: any) => {
+        const preventKeys = ["sha256"]
+        const key = parsePlutusJsonData(item.k)
+        const value = parsePlutusJsonData(item.v, bigintAsString, preventKeys.includes(key))
+        obj[key] = value
+      })
+      return obj
+    } else if (input.hasOwnProperty("list")) {
+      return input.list.map(parsePlutusJsonData)
+    } else if (input.hasOwnProperty("fields")) {
+      return input.fields.map(parsePlutusJsonData)
+    }
+    return input
+  } catch (error) {
+    logger(`Cardano Lib Error :: parsePlutusJsonData :: ${error}`)
+    return undefined
+  }
+}
+
+export const joinMetadata = (metadata: any, fields: string[]) => {
+  const updatedFields = fields.reduce((acc, field) => {
+    const rawField = metadata?.[field]
+    if (rawField) {
+      const finalField = Array.isArray(rawField) ? rawField.join("") : rawField
+      if (typeof finalField === "string") {
+        acc[field] = finalField
+      } else {
+        acc[field] = undefined
+      }
+    }
+    return acc
+  }, {} as any)
+  return updatedFields
 }

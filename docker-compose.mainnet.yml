@@ -1,67 +1,5 @@
 services:
-  postgres-mainnet:
-    image: postgres:16.1-alpine
-    profiles: ["mainnet"]
-    env_file: ./.env
-    environment:
-      - POSTGRES_LOGGING=true
-    ports:
-      - 127.0.0.1:5432:5432
-    shm_size: '2gb'
-    volumes:
-      - ./config/postgresql/postgresql.conf:/etc/postgresql.conf
-      - postgres-data-mainnet:/var/lib/postgresql/data
-    command: [
-      "-c", "config_file=/etc/postgresql.conf"
-    ]
-    restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
-  cardano-node-ogmios-mainnet:
-    image: cardanosolutions/cardano-node-ogmios:v6.10.0_10.1.3-mainnet
-    profiles: ["mainnet"]
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "400k"
-        max-file: "20"
-    ports:
-      - 127.0.0.1:1337:1337
-      - 3000:3000
-    restart: on-failure
-    volumes:
-      - node-db-mainnet:/db
-      - node-ipc-mainnet:/ipc
-
-  nftcdn-extractor-mainnet:
-    profiles: ["mainnet"]
-    build:
-      context: .
-      target: nftcdn-extractor
-    env_file: ./.env
-    volumes:
-      - cache-mainnet:/home/node/app/cache
-    environment:
-      - NETWORK=mainnet
-      - POSTGRES_HOST=postgres-mainnet
-      - POSTGRES_PORT=5432
-      - OGMIOS_HOST=cardano-node-ogmios-mainnet
-      - OGMIOS_PORT=1337
-    depends_on:
-      - cardano-node-ogmios-mainnet
-      - postgres-mainnet
-    restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "200k"
-        max-file: "10"
-
-  nftcdn-server-mainnet:
+  nftcdn-mainnet:
     profiles: ["mainnet"]
     build:
       context: .
@@ -69,18 +7,11 @@ services:
     env_file: ./.env
     environment:
       - NETWORK=mainnet
-      - POSTGRES_HOST=postgres-mainnet
-      - POSTGRES_PORT=5432
-      - KUBO_HOST=kubo
-      - KUBO_PORT=8080
-      - MAX_IMAGE_SIZE=2048
-      - SERVER_IMAGE_URL=
     volumes:
       - cache-mainnet:/home/node/app/cache
     ports:
       - 127.0.0.1:4700:4700
     depends_on:
-      - nftcdn-extractor-mainnet
       - kubo
     restart: on-failure
     logging:
@@ -90,7 +21,4 @@ services:
         max-file: "10"
 
 volumes:
-  postgres-data-mainnet:
-  node-db-mainnet:
-  node-ipc-mainnet:
   cache-mainnet:

@@ -1,10 +1,9 @@
 import express from "express"
-import { sql, desc, asc, eq, ne } from "drizzle-orm"
-import { db, schema } from "../../db"
-import { logger } from "../../utils"
-import * as Kubo from "../../services/kubo"
+import { logger } from "../utils"
+import * as Kubo from "../services/kubo"
 
-export const ipfs = express.Router()
+const ipfs = express.Router()
+export default ipfs
 
 ipfs.get("/*", async (req, res) => {
   try {
@@ -26,6 +25,7 @@ ipfs.get("/*", async (req, res) => {
       .then(() => res.end())
       .catch(() => res.destroy())
   } catch (error: any) {
+    console.log(error)
     logger(`Error :: ${JSON.stringify(error?.message)} :: ${JSON.stringify(error)}`)
     res.status(500).send("Internal Server Error").end()
   }
