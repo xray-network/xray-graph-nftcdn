@@ -12,6 +12,13 @@ import { IMAGE_SIZES, IMAGE_FORMATS } from "../config"
 
 export const imageRouter = new OpenAPIHono()
 
+const CIP25_CACHE_FOLDER = "./cache/cip25"
+const CIP26_CACHE_FOLDER = "./cache/cip26"
+const CIP68_CACHE_FOLDER = "./cache/cip68"
+!fs.existsSync(CIP25_CACHE_FOLDER) && fs.mkdirSync(CIP25_CACHE_FOLDER, { recursive: true })
+!fs.existsSync(CIP26_CACHE_FOLDER) && fs.mkdirSync(CIP26_CACHE_FOLDER, { recursive: true })
+!fs.existsSync(CIP68_CACHE_FOLDER) && fs.mkdirSync(CIP68_CACHE_FOLDER, { recursive: true })
+
 const imageRoute = createRoute({
   tags: ["Tokens"],
   method: "get",
