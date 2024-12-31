@@ -2,9 +2,7 @@
 
 # XRAY/Graph NFTCDN — Dockerized Metadata/Datums indexer & Image Server with IPFS gateway
 
-XRAY/Graph NFTCDN is a tool for fast and predictable deployment of Cardano Tokens Metadata/Datums Indexer ([Ogmios](https://ogmios.dev/)-based) & Image Resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)), and [Haproxy](https://www.haproxy.org/) (TCP/HTTP Load Balancer) stack in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider.
-
-Indexes metadata from `CIP-0025` (Media Token Metadata: TX Label 721), `CIP-0026` (Cardano Token Registry), `CIP-0027` (Royalties: TX Label 777), `CIP-0060` (Music Token), `CIP-0068` (Datum Metadata). Proxies and caches (in case of resize) images received from IPFS, HTTP, Base64 (on-chain). Supports sending WebP if the client supports this format.
+XRAY/Graph NFTCDN is a tool for caching Cardano token images & image resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)), with [Haproxy](https://www.haproxy.org/) (TCP/HTTP Load Balancer) in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider. Built on Koios API stack.
 
 ## Getting Started
 ### Prepare Installation
@@ -53,29 +51,24 @@ docker compose --profile preview up -d
 
 * NFTCDN — See Endpoints List below
 * Kubo — https://github.com/ipfs/kubo/
-* Ogmios — https://ogmios.dev/
 * Haproxy — https://www.haproxy.org/
 
 ## Endpoints List
-  
+
+```
+:id = Policy ID + Asset Name
+```
+
 | Method  | Endpoint | Params | Description |
 | --- | --- | --- | --- |
-| GET  | /image/:fingerprint | | Proxy original image (IPFS, HTTP, Base64) from asset metadata in order `cip68->cip25->cip26` |
-| GET  | /image/:fingerprint | ?select=cip25 | Specify from which metadata to load the image. Options: `cip25`, `cip26`, `cip68` |
-| GET  | /image/:fingerprint | ?size=256 | Resize, cache, and serve image |
-| GET  | /image/:fingerprint | ?size=256&crop=true |  Resize, crop (to square), cache, and serve image  |
-| GET  | /metadata/:fingerprint | |  Serve asset metadata  |
-| GET  | /metadata/:fingerprint | ?raw=true |  Don't replace image value with `SERVER_IMAGE_URL` prefix  |
-| POST  | /metadata | {"fingerprints": string[], "raw": boolean } |  Bulk metadata retreiving (up to 1000)  |
-| GET | /assets | | Get lits of assets with basic info |
-| GET | /assets | ?fingerprint= &policy_id= &asset_name= &asset_name_ascii= &limit= &offset= | Search params, `asset_name_ascii` searches as `%LIKE%` in `utf8->hex` format |
+| GET  | /image/:id | | Proxy original image (IPFS, HTTP, Base64) from asset metadata in order `cip68->cip25->cip26` |
+| GET  | /image/:id | ?select=cip25 | Specify from which metadata to load the image. Options: `cip25`, `cip26`, `cip68` |
+| GET  | /image/:id | ?size=256 | Resize, cache, and serve image |
+| GET  | /image/:id | ?size=256&crop=true |  Resize, crop (to square), cache, and serve image  |
+| GET  | /metadata/:id | |  Serve asset metadata  |
+| POST  | /metadata | {"_asset_list": string[][] } |  Bulk metadata retreiving (up to 1000)  |
 | GET | /ipfs/:cid |  | IPFS gateway proxy |
 
-
-## TypeScript Client
-  
-We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https://github.com/xray-network/cardano-nftcdn-client) repo for more information.
-  
 ## Advanced Usage
 
 <details>
@@ -91,15 +84,6 @@ We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https
   
 * Config file: [config/kubo/0001-init-config.sh](config/kubo/0001-init-config.sh)
 * Docs: [https://docs.ipfs.tech/reference/kubo/cli/#ipfs-config](https://docs.ipfs.tech/reference/kubo/cli/#ipfs-config)
-
-</details>
-
-<details>
-  <summary>Postgres Config</summary>
-  
-* Config file (see end of file): [config/postgresql/postgresql.conf](config/postgresql/postgresql.conf)
-* Docs: [https://www.postgresql.org/docs/current/index.html](https://www.postgresql.org/docs/current/index.html)
-* Tune settings: [https://pgtune.leopard.in.ua](https://pgtune.leopard.in.ua)
 
 </details>
 
