@@ -1,5 +1,5 @@
 services:
-  nftcdn-mainnet:
+  nftcdn-server-mainnet:
     profiles: ["mainnet"]
     build:
       context: .

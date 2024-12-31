@@ -1,5 +1,5 @@
 services:
-  nftcdn-preprod:
+  nftcdn-server-preprod:
     profiles: ["preprod"]
     build:
       context: .

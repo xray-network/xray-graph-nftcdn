@@ -1,5 +1,5 @@
 services:
-  nftcdn-preview:
+  nftcdn-server-preview:
     profiles: ["preview"]
     build:
       context: .
