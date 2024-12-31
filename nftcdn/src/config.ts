@@ -56,6 +56,7 @@ export const OPEN_API_HTML = `
     <body>
       <rapi-doc 
 				spec-url="openapi.json"
+				server-url="."
 				allow-spec-url-load="true"
 				allow-spec-file-load="false"
 				show-header="true"
