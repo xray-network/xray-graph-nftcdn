@@ -1,32 +1,45 @@
-import express from "express"
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi"
+import { stream } from "hono/streaming"
+import { z } from "zod"
 import { logger } from "../utils"
 import * as Kubo from "../services/kubo"
 
-const ipfs = express.Router()
-export default ipfs
+export const ipfsRouter = new OpenAPIHono()
 
-ipfs.get("/*", async (req, res) => {
-  try {
-    const cid = (req.params as any)?.[0]
-    const imageResponse = await Kubo.getImage(cid)
+const ipfsRoute = createRoute({
+  tags: ["IPFS"],
+  method: "get",
+  path: "/ipfs/{cid}",
+  summary: "Get image from IPFS by CID",
+  description:
+    "The image is fetched by CID from the IPFS gateway. The CID is the unique identifier of the image on the IPFS network.",
+  request: {
+    params: z.object({
+      cid: z
+        .string()
+        .openapi({ description: "The CID of the image", example: "QmaYWWWmrUJkWiKAaHRiYwLaSCNGT8he4ZpuQd5TddvRVJ" }),
+    }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/image": {
+          schema: z.string().openapi({
+            type: "string",
+            format: "binary",
+          }),
+        },
+      },
+      description: "The response from the server",
+    },
+  },
+})
 
-    imageResponse.headers.forEach((value, key) => {
-      res.setHeader(key, value)
-    })
-
-    await imageResponse.body
-      ?.pipeTo(
-        new WritableStream({
-          write(chunk) {
-            res.write(chunk)
-          },
-        })
-      )
-      .then(() => res.end())
-      .catch(() => res.destroy())
-  } catch (error: any) {
-    console.log(error)
-    logger(`Error :: ${JSON.stringify(error?.message)} :: ${JSON.stringify(error)}`)
-    res.status(500).send("Internal Server Error").end()
-  }
+ipfsRouter.openapi(ipfsRoute, async (ctx) => {
+  const cid = ctx.req.param("cid")
+  const imageResponse = await Kubo.getImage(cid)
+  return (ctx.res = new Response(imageResponse.body, {
+    status: imageResponse.status,
+    headers: imageResponse.headers,
+  }))
 })
