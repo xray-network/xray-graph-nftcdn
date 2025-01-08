@@ -1,6 +1,6 @@
 {
   "name": "xray-graph-nftcdn",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Cardano native tokens metadata/datums indexer/explorer and images CDN. IPFS gateway included.",
   "repository": {
     "type": "git",
