@@ -1,6 +1,6 @@
 #############################################################################################
 ### METADATA SERVER ###
-FROM node:20.11 as nftcdn-server
+FROM node:20.11 AS nftcdn-server
 WORKDIR /home/node/app
 COPY ./nftcdn ./
 RUN yarn install
