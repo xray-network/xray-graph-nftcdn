@@ -13,7 +13,9 @@ git clone \
   && cd xray-graph-nftcdn
 ```
 ``` console
-cp .env.example .env
+cp .env.example .env.mainnet && \
+cp .env.example .env.preprod && \
+cp .env.example .env.preview
 ```
   
 ### Build and Run via Docker Compose

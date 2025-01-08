@@ -4,7 +4,7 @@ services:
     build:
       context: .
       target: nftcdn-server
-    env_file: ./.env
+    env_file: ./.env.preview
     environment:
       - NETWORK=preview
     volumes:
