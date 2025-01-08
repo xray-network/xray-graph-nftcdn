@@ -13,6 +13,7 @@ git clone \
   && cd xray-graph-nftcdn
 ```
 ``` console
+cp .env.haproxy.example .env.haproxy && \
 cp .env.example .env.mainnet && \
 cp .env.example .env.preprod && \
 cp .env.example .env.preview
