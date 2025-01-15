@@ -104,8 +104,13 @@ imageRouter.openapi(imageRoute, async (ctx) => {
 
   const assetMetadata = (await Koios.getAssetsMetadata([assetId]))?.data?.[0]
   if (!assetMetadata) {
-    ctx.status(404)
-    return ctx.text(`Image Not Found :: ${assetIdRaw}`)
+    return (ctx.res = new Response(fs.readFileSync(`./src/images/404/${size}.png`), {
+      status: 404,
+      headers: {
+        "content-type": `image/png`,
+        "cache-control": "public, max-age=31536000, immutable",
+      },
+    }))
   }
 
   const policy_id = assetMetadata?.policy_id!
@@ -260,6 +265,11 @@ imageRouter.openapi(imageRoute, async (ctx) => {
     }
   }
 
-  ctx.status(404)
-  return ctx.text(`Image Not Found :: ${assetIdRaw}`)
+  return (ctx.res = new Response(fs.readFileSync(`./src/images/404/${size}.png`), {
+    status: 404,
+    headers: {
+      "content-type": `image/png`,
+      "cache-control": "public, max-age=31536000, immutable",
+    },
+  }))
 })

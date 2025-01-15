@@ -3,7 +3,7 @@ import * as Types from "./types"
 import { version } from "../package.json"
 
 export const NETWORK = process.env.NETWORK || "mainnet"
-export const IMAGE_SIZES = (process.env.IMAGE_SIZES ? JSON.parse(process.env.IMAGE_SIZES) : []) as any
+export const IMAGE_SIZES = (process.env.IMAGE_SIZES ? JSON.parse(process.env.IMAGE_SIZES) : []) as readonly [string, ...string[]]
 export const JWT_BEARER_TOKEN = process.env.JWT_BEARER_TOKEN
 
 export const KOIOS_HOST = process.env.KOIOS_HOST
