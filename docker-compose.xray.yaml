@@ -1,0 +1,26 @@
+services:
+  nftcdn:
+    build:
+      context: .
+      target: nftcdn-server
+    environment:
+      - NETWORK=${NETWORK:-mainnet}
+      - IMAGE_SIZES=${IMAGE_SIZES_MAINNET:-["original", "64", "128", "256", "512", "1024", "2048"]}
+      - BEARER_RESOLVER_TOKEN=${BEARER_RESOLVER_TOKEN:-}
+      - KOIOS_HOST=${KOIOS_HOST:-https://graph.xray.app/output/services/koios/mainnet/api/v1}
+      - KOIOS_PORT=${KOIOS_PORT:-}
+      - KUBO_HOST=${KUBO_HOST:-}
+      - KUBO_PORT=${KUBO_PORT:-8080}
+    volumes:
+      - cache:/home/node/app/cache
+    ports:
+      - ${NFTCDN_PORT:-127.0.0.1:4700}:4700
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  cache:
