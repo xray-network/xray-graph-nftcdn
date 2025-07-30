@@ -4,12 +4,13 @@ services:
       context: .
       target: nftcdn-server
     environment:
-      - NETWORK=${NETWORK:-mainnet}
-      - IMAGE_SIZES=${IMAGE_SIZES_MAINNET:-["original", "64", "128", "256", "512", "1024", "2048"]}
+      - NETWORK=${NETWORK:-}
+      - IMAGE_SIZES=${IMAGE_SIZES:-["original", "64", "128", "256", "512", "1024", "2048"]}
       - BEARER_RESOLVER_TOKEN=${BEARER_RESOLVER_TOKEN:-}
-      - KOIOS_HOST=${KOIOS_HOST:-https://graph.xray.app/output/services/koios/mainnet/api/v1}
+      - AUTHORIZATION_TOKEN=${AUTHORIZATION_TOKEN:-}
+      - KOIOS_HOST=${KOIOS_HOST:-}
       - KOIOS_PORT=${KOIOS_PORT:-}
-      - KUBO_HOST=${KUBO_HOST:-}
+      - KUBO_HOST=${KUBO_HOST:-kubo}
       - KUBO_PORT=${KUBO_PORT:-8080}
     volumes:
       - cache:/home/node/app/cache
@@ -21,6 +22,20 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nftcdn-${NETWORK}.rule=Host(`any`) || (Header(`Host-Resolver`,`nftcdn/${NETWORK}`) && Header(`Bearer-Resolver`,`${BEARER_RESOLVER_TOKEN}`))
+      - traefik.http.routers.nftcdn-${NETWORK}.entrypoints=websecure
+      - traefik.http.routers.nftcdn-${NETWORK}.tls=true
+      - traefik.http.routers.nftcdn-${NETWORK}.service=nftcdn-${NETWORK}
+      - traefik.http.services.nftcdn-${NETWORK}.loadbalancer.server.port=4700
+    networks:
+      - default
+      - traefik
 
 volumes:
   cache:
+
+networks:
+  traefik:
+    external: true
