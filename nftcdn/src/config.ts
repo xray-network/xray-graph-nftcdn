@@ -4,7 +4,8 @@ import { version } from "../package.json"
 
 export const NETWORK = process.env.NETWORK || "mainnet"
 export const IMAGE_SIZES = (process.env.IMAGE_SIZES ? JSON.parse(process.env.IMAGE_SIZES) : []) as readonly [string, ...string[]]
-export const JWT_BEARER_TOKEN = process.env.JWT_BEARER_TOKEN
+export const BEARER_RESOLVER_TOKEN = process.env.BEARER_RESOLVER_TOKEN
+export const AUTHORIZATION_TOKEN = process.env.AUTHORIZATION_TOKEN
 
 export const KOIOS_HOST = process.env.KOIOS_HOST
 export const KOIOS_PORT = Number(process.env.KOIOS_PORT)

@@ -1,4 +1,4 @@
-import { KUBO_HOST, KUBO_PORT, JWT_BEARER_TOKEN, NETWORK } from "../config"
+import { KUBO_HOST, KUBO_PORT, BEARER_RESOLVER_TOKEN, AUTHORIZATION_TOKEN, NETWORK } from "../config"
 
 const kuboProtocolAndHost = KUBO_HOST?.startsWith("http") ? KUBO_HOST?.split("://") : [undefined, KUBO_HOST]
 const kuboProtocol = kuboProtocolAndHost?.[0] === "https" ? "https" : "http"
@@ -7,8 +7,11 @@ const kuboPort = KUBO_PORT
 const kuboUrl = `${kuboProtocol}://${kuboHost}${kuboPort ? `:${kuboPort}` : ""}`
 
 const headers = {
-  ...(JWT_BEARER_TOKEN && {
-    "Bearer-Resolver": `${JWT_BEARER_TOKEN}`,
+  ...(AUTHORIZATION_TOKEN && {
+    "Authorization": `${AUTHORIZATION_TOKEN}`,
+  }),
+  ...(BEARER_RESOLVER_TOKEN && {
+    "Bearer-Resolver": `${BEARER_RESOLVER_TOKEN}`,
     "Host-Resolver": `kubo/${NETWORK}`,
   }),
 }

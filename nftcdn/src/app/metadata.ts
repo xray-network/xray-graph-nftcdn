@@ -41,6 +41,7 @@ metadataRouter.openapi(getRoute, async (ctx) => {
   const assetId = [assetIdRaw.slice(0, 56), assetIdRaw.slice(56)]
 
   const response = (await Koios.getAssetsMetadata([assetId])).data || []
+  console.log("Metadata response:", await Koios.getAssetsMetadata([assetId]))
 
   if (!response.length) {
     return ctx.text("Metadata Not Found", 404)

@@ -1,5 +1,5 @@
 import KoiosClient from "cardano-koios-client"
-import { KOIOS_HOST, KOIOS_PORT, JWT_BEARER_TOKEN, NETWORK } from "../config"
+import { KOIOS_HOST, KOIOS_PORT, BEARER_RESOLVER_TOKEN, AUTHORIZATION_TOKEN, NETWORK } from "../config"
 
 const koiosProtocolAndHost = KOIOS_HOST?.startsWith("http") ? KOIOS_HOST?.split("://") : [undefined, KOIOS_HOST]
 const koiosProtocol = koiosProtocolAndHost?.[0] === "https" ? "https" : "http"
@@ -8,8 +8,11 @@ const koiosPort = KOIOS_PORT
 const koiosUrl = `${koiosProtocol}://${koiosHost}${koiosPort ? `:${koiosPort}` : ""}`
 
 const headers = {
-  ...(JWT_BEARER_TOKEN && {
-    "Bearer-Resolver": `${JWT_BEARER_TOKEN}`,
+  ...(AUTHORIZATION_TOKEN && {
+    "Authorization": `${AUTHORIZATION_TOKEN}`,
+  }),
+  ...(BEARER_RESOLVER_TOKEN && {
+    "Bearer-Resolver": `${BEARER_RESOLVER_TOKEN}`,
     "Host-Resolver": `koios/${NETWORK}`,
   }),
 }
