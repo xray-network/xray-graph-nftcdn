@@ -9,7 +9,7 @@ const koiosUrl = `${koiosProtocol}://${koiosHost}${koiosPort ? `:${koiosPort}` :
 
 const headers = {
   ...(AUTHORIZATION_TOKEN && {
-    "Authorization": `${AUTHORIZATION_TOKEN}`,
+    Authorization: `${AUTHORIZATION_TOKEN}`,
   }),
   ...(BEARER_RESOLVER_TOKEN && {
     "Bearer-Resolver": `${BEARER_RESOLVER_TOKEN}`,

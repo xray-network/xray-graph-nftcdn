@@ -9,6 +9,11 @@ export const metadataRouter = new OpenAPIHono()
 const getRoute = createRoute({
   tags: ["Tokens"],
   method: "get",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   path: "/metadata/{id}",
   summary: "Get metadata by token ID",
   description:
@@ -52,6 +57,11 @@ metadataRouter.openapi(getRoute, async (ctx) => {
 const postRoute = createRoute({
   tags: ["Tokens"],
   method: "post",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   path: "/metadata",
   summary: "Get metadata by token ID (bulk)",
   description:

@@ -3,7 +3,10 @@ import * as Types from "./types"
 import { version } from "../package.json"
 
 export const NETWORK = process.env.NETWORK || "mainnet"
-export const IMAGE_SIZES = (process.env.IMAGE_SIZES ? JSON.parse(process.env.IMAGE_SIZES) : []) as readonly [string, ...string[]]
+export const IMAGE_SIZES = (process.env.IMAGE_SIZES ? JSON.parse(process.env.IMAGE_SIZES) : []) as readonly [
+  string,
+  ...string[],
+]
 export const BEARER_RESOLVER_TOKEN = process.env.BEARER_RESOLVER_TOKEN
 export const AUTHORIZATION_TOKEN = process.env.AUTHORIZATION_TOKEN
 
@@ -34,10 +37,44 @@ export const labelType = (label: number): string | undefined => {
 
 export const OPEN_API_CONFIG = {
   openapi: "3.1.0",
+  servers: [
+    {
+      url: "https://graph.xray.app/output/services/nftcdn/mainnet/api/v1",
+      description: "Mainnet",
+    },
+    {
+      url: "https://graph.xray.app/output/services/nftcdn/preprod/api/v1",
+      description: "Preprod",
+    },
+    {
+      url: "https://graph.xray.app/output/services/nftcdn/preview/api/v1",
+      description: "Preview",
+    },
+  ],
   info: {
     version,
     title: "XRAY/Graph NFTCDN",
-    description: "XRAY/Graph NFTCDN — A caching and image server for Cardano tokens, integrated with an IPFS gateway",
+    description: `<div>
+			<div style="background: #efefef;padding: 20px 30px;margin-top: 30px;border-left: 5px solid #1940ED;">
+				<div style="font-size:12px; font-weight:bold;margin-bottom:10px;">DESCRIPTION</div>
+				<div>
+					<p>
+						Cardano NFTCDN delivers fast and reliable access to NFT images and metadata on the Cardano blockchain, providing a content delivery layer optimized for performance and scalability. It enables developers and platforms to seamlessly serve NFT assets through a high-speed CDN, ensuring quick load times and consistent availability.
+					</p>
+				</div>
+			</div>
+			<div style="background: #efefef;padding: 20px 30px;margin-top: 30px;border-left: 5px solid #1940ED;">
+				<div style="font-size:12px; font-weight:bold;margin-bottom:10px;">AUTHENTICATION & HIGHER USAGE LIMITS</div>
+				<div>
+					<p>For high-traffic applications, we recommend using the paid XRAY/Graph access (set Authorization header in Authentication section):</p>
+					<ul>
+						<li>XRAY/Graph: <a href="https://xray.app">https://xray.app</a></li>
+					</ul>
+				</div>
+			</div>
+			<br /><br /><hr /><br />
+		</div>
+		`,
   },
 }
 
@@ -50,20 +87,22 @@ export const OPEN_API_HTML = `
 			<link rel="stylesheet" href="https://cdn.xray.app/fonts/satoshi.css" type="text/css" media="all" />
       <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
 			<style>
-				rapi-doc::part(section-navbar) { border-right: 1px solid #dadde1; padding-top: 10px; }
-				rapi-doc::part(section-header) { box-shadow: 0 1px 2px 0 #0000001a; position: relative; z-index: 100; }
+        rapi-doc { font-size: 14px; }
+        rapi-doc::part(section-navbar) { border-right: 1px solid #dadde1; padding-top: 10px; }
+        rapi-doc::part(section-header) { box-shadow: 0 1px 2px 0 #dadde1; position: relative; z-index: 100; }
+        rapi-doc::part(label-header-title) { font-weight: bold; }
 			</style>
     </head>
     <body>
       <rapi-doc 
 				spec-url="openapi.json"
-				server-url="."
 				allow-spec-url-load="true"
 				allow-spec-file-load="false"
 				show-header="true"
 				show-info="true"
-				allow-server-selection="false"
-				allow-authentication="false"
+				sort-tags="false"
+				allow-server-selection="true"
+				allow-authentication="true"
 				allow-api-list-style-selection="true"
 				render-style="focused"
 				schema-style="table"

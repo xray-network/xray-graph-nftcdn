@@ -22,6 +22,11 @@ const CIP68_CACHE_FOLDER = "./cache/cip68"
 const imageRoute = createRoute({
   tags: ["Tokens"],
   method: "get",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   path: "/image/{id}",
   summary: "Get (cached) image by token ID",
   description: "Image is fetched by token ID from the NFTCDN cache.",

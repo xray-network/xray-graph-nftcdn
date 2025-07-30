@@ -11,6 +11,14 @@ import { ipfsRouter } from "./app/ipfs"
 const app = new OpenAPIHono()
 app.use("/*", cors())
 
+
+app.openAPIRegistry.registerComponent("securitySchemes", "bearerAuth", {
+  type: "http",
+  scheme: "bearer",
+  bearerFormat: "JWT",
+  description: "",
+})
+
 // Routes
 app.route("/", imageRouter)
 app.route("/", metadataRouter)

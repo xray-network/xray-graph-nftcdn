@@ -8,7 +8,7 @@ const kuboUrl = `${kuboProtocol}://${kuboHost}${kuboPort ? `:${kuboPort}` : ""}`
 
 const headers = {
   ...(AUTHORIZATION_TOKEN && {
-    "Authorization": `${AUTHORIZATION_TOKEN}`,
+    Authorization: `${AUTHORIZATION_TOKEN}`,
   }),
   ...(BEARER_RESOLVER_TOKEN && {
     "Bearer-Resolver": `${BEARER_RESOLVER_TOKEN}`,

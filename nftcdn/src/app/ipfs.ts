@@ -9,6 +9,11 @@ export const ipfsRouter = new OpenAPIHono()
 const ipfsRoute = createRoute({
   tags: ["IPFS"],
   method: "get",
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
   path: "/ipfs/{cid}",
   summary: "Get image from IPFS by CID",
   description:
