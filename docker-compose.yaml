@@ -1,0 +1,27 @@
+services:
+  nftcdn:
+    build:
+      context: .
+      target: nftcdn-server
+    environment:
+      - NETWORK=${NETWORK:-}
+      - IMAGE_SIZES=${IMAGE_SIZES:-["original", "64", "128", "256", "512", "1024", "2048"]}
+      - BEARER_RESOLVER_TOKEN=${BEARER_RESOLVER_TOKEN:-}
+      - AUTHORIZATION_TOKEN=${AUTHORIZATION_TOKEN:-}
+      - KOIOS_HOST=${KOIOS_HOST:-}
+      - KOIOS_PORT=${KOIOS_PORT:-}
+      - KUBO_HOST=${KUBO_HOST:-kubo}
+      - KUBO_PORT=${KUBO_PORT:-8080}
+    volumes:
+      - cache:/home/node/app/cache
+    ports:
+      - ${NFTCDN_PORT:-4700}:4700
+    restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+volumes:
+  cache:
