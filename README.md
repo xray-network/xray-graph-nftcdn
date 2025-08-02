@@ -51,6 +51,13 @@ docker compose -f docker-compose.yaml -p nftcdn-preview up -d --build
 ## Advanced Usage
 
 <details>
+  <summary><b>TypeScript Client</b></summary>
+  
+We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https://github.com/xray-network/cardano-nftcdn-client) repo for more information.
+
+</details>
+
+<details>
   <summary><b>Using in Graph Cluster (Traefik Reverse Proxy)</b></summary>
 
 1. Clone and run Traefik:
@@ -80,6 +87,7 @@ docker compose -f docker-compose.xray.yaml -p nftcdn-mainnet up -d --build
 
 * Rapidoc Playground (OpenAPI Schema) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/
 * OpenAPI Schema (JSON) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/openapi.json
+* TypeScript Client — https://github.com/xray-network/cardano-nftcdn-client
 * Traefik — https://traefik.io/traefik
 
 
