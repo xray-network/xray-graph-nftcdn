@@ -85,9 +85,9 @@ docker compose -f docker-compose.xray.yaml -p nftcdn-mainnet up -d --build
 
 ## Documentation
 
-* Rapidoc Playground (OpenAPI Schema) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/
-* OpenAPI Schema (JSON) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/openapi.json
-* TypeScript Client — https://github.com/xray-network/cardano-nftcdn-client
+* NFTCDN Rapidoc Playground (OpenAPI Schema) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/
+* NFTCDN OpenAPI Schema (JSON) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/openapi.json
+* NFTCDN TypeScript Client — https://github.com/xray-network/cardano-nftcdn-client
 * Traefik — https://traefik.io/traefik
 
 
