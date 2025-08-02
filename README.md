@@ -64,7 +64,7 @@ We recommend to use `cardano-nftcdn-client`. Visit [cardano-nftcdn-client](https
 ``` console
 git clone https://github.com/xray-network/traefik-docker.git \
 && cd traefik-docker \
-&& docker compose -up d
+&& docker compose up -d
 ```
 
 2. Set `BEARER_RESOLVER_TOKEN` and `docker-compose.kubo.xray.yaml`:
