@@ -2,91 +2,84 @@
 
 # XRAY/Graph NFTCDN — Dockerized Metadata/Datums indexer & Image Server with IPFS gateway
 
-XRAY/Graph NFTCDN is a tool for caching Cardano token images & image resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)), with [Haproxy](https://www.haproxy.org/) (TCP/HTTP Load Balancer) in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider. Built on Koios API stack.
+XRAY/Graph NFTCDN is a tool for caching Cardano token images & image resizer ([Sharp](https://sharp.pixelplumbing.com/)-based), IPFS Gateway ([Kubo](https://github.com/ipfs/kubo/)) in a docker environment. Used in the [XRAY/Graph](https://xray.app/) distributed Cardano API provider. Built on Koios API stack.
 
 ## Getting Started
+
 ### Prepare Installation
 
+Clone repository:
 ``` console
 git clone \
   https://github.com/xray-network/xray-graph-nftcdn.git \
   && cd xray-graph-nftcdn
 ```
-``` console
-cp .env.haproxy.example .env.haproxy && \
-cp .env.example .env.mainnet && \
-cp .env.example .env.preprod && \
-cp .env.example .env.preview
-```
-  
-### Build and Run via Docker Compose
 
-> You can combine profiles to run multiple networks on the same machine: `docker compose --profile mainnet --profile preprod --profile preview up -d`
-  
-<details open>
-  <summary><b>MAINNET</b></summary>
-
+Run Kubo:
 ``` console
-docker compose --profile mainnet up -d
+docker compose -f docker-compose.kubo.yaml up -d --build
 ```
 
-</details>
-  
+## MAINNET
+
+Add `AUTHORIZATION_TOKEN` if necessary. Set `KUBO_HOST` and `KUBO_PORT` if you want to use a remote Kubo instance.
+
+``` console
+NETWORK=mainnet \
+KOIOS_HOST=https://graph.xray.app/output/services/koios/mainnet/api/v1 \
+docker compose -f docker-compose.yaml -p nftcdn-mainnet up -d --build
+```
+
+## PREPROD
+
+``` console
+NETWORK=preprod \
+KOIOS_HOST=https://graph.xray.app/output/services/koios/preprod/api/v1 \
+NFTCDN_PORT=4701 \
+docker compose -f docker-compose.yaml -p nftcdn-preprod up -d --build
+```
+
+## PREVIEW
+
+``` console
+NETWORK=preview \
+KOIOS_HOST=https://graph.xray.app/output/services/koios/preview/api/v1 \
+NFTCDN_PORT=4702 \
+docker compose -f docker-compose.yaml -p nftcdn-preview up -d --build
+```
+
+## Advanced Usage
+
 <details>
-  <summary><b>PREPROD</b></summary>
+  <summary><b>Using in Graph Cluster (Traefik Reverse Proxy)</b></summary>
 
+1. Clone and run Traefik:
 ``` console
-docker compose --profile preprod up -d
+git clone https://github.com/xray-network/traefik-docker.git \
+&& cd traefik-docker \
+&& docker compose -up d
 ```
 
-</details>
-  
-<details>
-  <summary><b>PREVIEW</b></summary>
-
+2. Set `BEARER_RESOLVER_TOKEN` and `docker-compose.kubo.xray.yaml`:
 ``` console
-docker compose --profile preview up -d
+BEARER_RESOLVER_TOKEN=your_access_token \
+docker compose -f docker-compose.kubo.xray.yaml up -d --build
+```
+
+3. Set `BEARER_RESOLVER_TOKEN` and `docker-compose.xray.yaml`:
+``` console
+NETWORK=mainnet \
+BEARER_RESOLVER_TOKEN=your_access_token \
+KOIOS_HOST=https://graph.xray.app/output/services/koios/mainnet/api/v1 \
+docker compose -f docker-compose.xray.yaml -p nftcdn-mainnet up -d --build
 ```
 
 </details>
 
 ## Documentation
 
-* NFTCDN — See Endpoints List below
-* Kubo — https://github.com/ipfs/kubo/
-* Haproxy — https://www.haproxy.org/
+* Rapidoc Playground (OpenAPI Schema) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/
+* OpenAPI Schema (JSON) - https://graph.xray.app/output/services/nftcdn/mainnet/api/v1/openapi.json
+* Traefik — https://traefik.io/traefik
 
-## Endpoints List
-
-```
-:id = Policy ID + Asset Name
-```
-
-| Method  | Endpoint | Params | Description |
-| --- | --- | --- | --- |
-| GET  | /image/:id | | Proxy original image (IPFS, HTTP, Base64) from asset metadata in order `cip68->cip25->cip26` |
-| GET  | /image/:id | ?select=cip25 | Specify from which metadata to load the image. Options: `cip25`, `cip26`, `cip68` |
-| GET  | /image/:id | ?size=256 | Resize, cache, and serve image |
-| GET  | /image/:id | ?size=256&crop=true |  Resize, crop (to square), cache, and serve image  |
-| GET  | /metadata/:id | |  Serve asset metadata  |
-| POST  | /metadata | {"_asset_list": string[][] } |  Bulk metadata retreiving (up to 1000)  |
-| GET | /ipfs/:cid |  | IPFS gateway proxy |
-
-## Advanced Usage
-
-<details>
-  <summary>HAProxy Config</summary>
-  
-* Config file: [config/haproxy/haproxy.cfg](config/haproxy/haproxy.cfg)
-* Docs: [https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/](https://www.haproxy.com/documentation/haproxy-configuration-manual/latest/)
-
-</details>
-
-<details>
-  <summary>Kubo Config</summary>
-  
-* Config file: [config/kubo/0001-init-config.sh](config/kubo/0001-init-config.sh)
-* Docs: [https://docs.ipfs.tech/reference/kubo/cli/#ipfs-config](https://docs.ipfs.tech/reference/kubo/cli/#ipfs-config)
-
-</details>
 
